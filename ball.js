@@ -1,10 +1,10 @@
 function Ball(){
 
-this.x = 335
-this.y = 398
+this.x = 500
+this.y = 250
 
-this.dx = 500;
-this.dy = 500;
+this.dx = 0;
+this.dy = 0;
 
 this.radius = 10;
 

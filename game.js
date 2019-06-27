@@ -10,7 +10,13 @@ HEIGHT = 500;
 
 MAX_BALL_SPEED_Y = 300;
 
-MAX_PADDLE_SPEED = 1000;
+MAX_PADDLE_SPEED = 500;
+
+PLAYER_1_POINTS = 0;
+
+PLAYER_2_POINTS = 0;
+
+
 
 function Game(context, width, height) {
 
@@ -71,12 +77,18 @@ function Game(context, width, height) {
 
    		// Check if ball hits right side
    		if(this.ball.x + this.ball.radius >= this.width){
-   			this.ball.dx = -1 * Math.abs(this.ball.dx);
+   			this.newRound();
+            PLAYER_1_POINTS = PLAYER_1_POINTS + 1;
    		}
+
+
    		// check if ball hits left side
    		if(this.ball.x - this.ball.radius <= 0){
-   			this.ball.dx = Math.abs(this.ball.dx);
+   			this.newRound();
+            PLAYER_2_POINTS = PLAYER_2_POINTS + 1;
    		}
+
+
    		//check if ball hits bottom
    		if(this.ball.y + this.ball.radius >= this.height){
    			this.ball.dy = -1*Math.abs(this.ball.dy);
@@ -85,9 +97,11 @@ function Game(context, width, height) {
    		if(this.ball.y - this.ball.radius <=0){
    			this.ball.dy = Math.abs(this.ball.dy);
 
-		    }   	
+         }   	
 
-
+         if(PLAYER_2_POINTS == 5 || PLAYER_1_POINTS == 5){
+            this.newGame();
+         }
    	}
 
    this.render = function() {
@@ -101,26 +115,43 @@ function Game(context, width, height) {
    		this.paddle1.render(this.ctx);
    		this.paddle2.render(this.ctx);
    	
-         //this.drawScore();
-
+         this.drawScore();
+         this.drawInstructions();
       }
 
       this.drawScore = function(){
          ctx.font = "16px Arial";
-         ctx.fillText("score", 450, 50);
+         ctx.fillText(PLAYER_1_POINTS + " - " + PLAYER_2_POINTS, 480, 50);
+         ctx.filStyle = "white";
+      }
+
+      this.drawInstructions = function(){
+         ctx.font = "20px Arial";
+         ctx.fillText("Press SPACE to start!", 400, 400);
+         ctx.fillStyle = "white";
       }
 
 
 
    this.newRound = function(){
-      //reset ball
+      this.ball.dx = 0;
+      this.ball.dy = 0;
+      this.ball.x = 500
+      this.ball.y = 250
 
-
-
+      this.drawInstructions();
    }
 
    this.newGame = function(){
+      this.ball.dx = 0;
+      this.ball.dy = 0;
+      this.ball.x = 500
+      this.ball.y = 250
 
+      this.drawInstructions();
+
+      PLAYER_1_POINTS = 0;
+      PLAYER_2_POINTS = 0;
    }
 
 
@@ -153,7 +184,15 @@ function Game(context, width, height) {
       this.paddle2.dy = 0;
    }
 
-};
+   this.startGame = function(){
+      this.ball.dx = (Math.floor(Math.random() * 2) -1) * 500;
+      this.drawInstructions.ctx.filStyle = "black";
+   }
+
+
+}
+
+
 
 
 var game = new Game(ctx, 1000, 500);
@@ -178,6 +217,15 @@ window.onkeydown = function(e){
       // move paddle 2 down
       game.movePaddle2Down();
    }
+
+   if(e.key == "ArrowRight"){
+      game.stopPaddle1();
+   }
+
+   if(e.key == " "){
+      game.startGame();
+
+   }
 }
 
 
@@ -185,21 +233,17 @@ window.onkeyup = function(e){
 
 
    // if key is up or down, game.stopPaddle2();
-if(e.key == "w" || e.key == "s"){
-   game.stopPaddle1();
-}
+   if(e.key == "w" || e.key == "s"){
+      game.stopPaddle1();
+   }
 
-if(e.key == "ArrowUp" || e.key == "ArrowDown"){
-   game.stopPaddle2();
-}
+   if(e.key == "ArrowUp" || e.key == "ArrowDown"){
+      game.stopPaddle2();
+   }
 
 
 }
 
 game.loop();
-
-
-
-
 
 
