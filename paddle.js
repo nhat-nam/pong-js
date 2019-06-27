@@ -1,9 +1,9 @@
-function Paddle(x){
+ function Paddle(x){
 
 this.x = x
 this.y = 18
 
-this.dy = 200;
+this.dy = 0;
 
 this.width= 30;
 this.length = 80;
@@ -24,7 +24,7 @@ this.update = function(delta){
 
 }
 this.render = function(ctx){
-		ctx.fillStyle="white";
+		ctx.fillStyle = "white";
 		ctx.fillRect(this.x, this.y, this.width, this.length);
 
 	}
