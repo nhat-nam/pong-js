@@ -29,6 +29,19 @@ function Game(context, width, height) {
    this.paddle2 = new Paddle(this.width - 20 - 30);
 
 
+   this.menu = new Menu(width, height);
+   this.menu.init();
+   this.pauseMenu = new PauseMenu(width, height);
+   this.pauseMenu.init();
+   this.endMenu = new AvengersMenu(width, height);
+   this.endMenu.init();
+
+
+   this.player_1_points = 0;
+   this.player_2_points = 0;
+
+   this.game_state = "menu";
+   this.player_count = 1;
 
    this.loop = function(){
 		this.update(this._delta);
@@ -44,10 +57,24 @@ function Game(context, width, height) {
 
 
    this.update = function(delta) {
+
+      // new code for menu....
+
+
+      if(this.game_state == "menu"){
+         // 
+      }else if(this.game_state == "playing" || this.game_state == "serve"){
    
    		this.ball.update(delta);
    		this.paddle1.update(delta);
+
+
+         /* update based on computer AI */
+
+
+
    		this.paddle2.update(delta);
+
 
 
          var centerOfPaddle, distanceFromCenter;
@@ -100,23 +127,43 @@ function Game(context, width, height) {
          }   	
 
          if(PLAYER_2_POINTS == 5 || PLAYER_1_POINTS == 5){
+            this.game_state = "game_over";
+            if(PLAYER_2_POINTS > PLAYER_1_POINTS){
+
+               this.endMenu.winner = 2;
+            }else{
+               this.endMenu.winner = 1;
+            }
+
             this.newGame();
+
          }
-   	}
+      }
+
+   }
 
    this.render = function() {
    		this.ctx.clearRect(0, 0, this.width, this.height);
    		this.ctx.fillStyle = "black";
    		this.ctx.fillRect(0, 0, this.width, this.height);
 
+         if(this.game_state == "menu"){
+            this.menu.render(this.ctx);
+         }else if (this.game_state == "paused"){
+            this.pauseMenu.render(this.ctx);
+         }else if(this.game_state == "game_over"){
+            this.endMenu.render(this.ctx);
+         }else{
 
+            this.ball.render(this.ctx);
+            this.paddle1.render(this.ctx);
+            this.paddle2.render(this.ctx);
+            if(this.game_state =="serve"){
+               this.drawInstructions();      
+            }
+            this.drawScore();
+         }
 
-   		this.ball.render(this.ctx);
-   		this.paddle1.render(this.ctx);
-   		this.paddle2.render(this.ctx);
-   	
-         this.drawScore();
-         this.drawInstructions();
       }
 
       this.drawScore = function(){
@@ -127,26 +174,22 @@ function Game(context, width, height) {
 
       this.drawInstructions = function(){
          ctx.font = "20px Arial";
-         ctx.fillText("Press SPACE to start!", 400, 400);
+         ctx.fillText("Press SPACE to serve!", 400, 400);
          ctx.fillStyle = "white";
       }
 
 
 
    this.newRound = function(){
-      this.ball.dx = 0;
-      this.ball.dy = 0;
-      this.ball.x = 500
-      this.ball.y = 250
+      this.ball.reset();
+      this.game_state = "serve";
 
       this.drawInstructions();
    }
 
    this.newGame = function(){
-      this.ball.dx = 0;
-      this.ball.dy = 0;
-      this.ball.x = 500
-      this.ball.y = 250
+
+      this.ball.reset();
 
       this.drawInstructions();
 
@@ -184,9 +227,25 @@ function Game(context, width, height) {
       this.paddle2.dy = 0;
    }
 
+   this.serve = function(){
+      this.ball.serve(Math.floor(Math.random() * 2));
+      this.game_state = "playing";
+
+   }
+   this.pause = function(){
+      this.game_state = "paused";
+   }
+   this.unpause = function(){
+      this.game_state = "playing";
+   }   
    this.startGame = function(){
-      this.ball.dx = (Math.floor(Math.random() * 2) -1) * 500;
-      this.drawInstructions.ctx.filStyle = "black";
+
+      // howmany players? 
+      // this.menu.option (0 -> 1 player, 1 -> 2 players)
+      this.player_count = this.menu.current_option + 1; 
+      this.game_state = "serve";
+      this.ball.reset();
+      //this.ball.dx = (Math.floor(Math.random() * 2) -1) * 500;
    }
 
 
@@ -198,9 +257,11 @@ function Game(context, width, height) {
 var game = new Game(ctx, 1000, 500);
 
 window.onkeydown = function(e){
+
+
    console.log(e);
    // Paddle #1
-   if(e.key == "w"){
+   if(e.key == "w"){ 
       game.movePaddle1Up();
    }
 
@@ -211,11 +272,26 @@ window.onkeydown = function(e){
    // Paddle #2 
    if(e.key == "ArrowUp"){
       // move paddle 2 up 
-      game.movePaddle2Up();
+      if((game.game_state == "playing" || game.game_state == "serve") && game.player_count == 2){
+         game.movePaddle2Up();
+      }else if (game.game_state == "menu"){
+         game.menu.optionUp();
+      }  else if (game.game_state == "game_over"){
+         game.endMenu.optionUp();
+      }   
+
+
    }
    if(e.key == "ArrowDown"){
       // move paddle 2 down
-      game.movePaddle2Down();
+      if((game.game_state == "playing" || game.game_state == "serve")  && game.player_count == 2){
+         game.movePaddle2Down();
+      }else if (game.game_state == "menu"){
+         game.menu.optionDown();
+      }else if (game.game_state == "game_over"){
+         game.endMenu.optionDown();
+      }
+
    }
 
    if(e.key == "ArrowRight"){
@@ -223,7 +299,26 @@ window.onkeydown = function(e){
    }
 
    if(e.key == " "){
-      game.startGame();
+      if(game.game_state == "menu"){
+         game.startGame();
+      }else if (game.game_state == "serve"){
+
+         //pause game.
+         //serve the ball
+         game.serve();
+      }else if(game.game_state == "playing"){
+         //pause
+         game.pause();
+      }else if(game.game_state == "paused"){
+         game.unpause();
+      }else if (game.game_state == "game_over"){
+         if(game.endMenu.current_option==1){
+            game.game_state = "menu";
+         }else{
+           game.startGame();
+         }
+      }
+      
 
    }
 }

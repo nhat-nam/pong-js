@@ -6,6 +6,9 @@ this.y = 250
 this.dx = 0;
 this.dy = 0;
 
+this.starting_speed = 500;
+this.max_speed_x = 1000;
+
 this.radius = 10;
 
 this.update = function(delta){
@@ -23,12 +26,35 @@ this.render = function(ctx){
 	}
 
 
+	this.serve = function(dir){
+
+		if(dir == 0){
+			//left
+			this.dx = -1 * this.starting_speed;
+
+		}else{
+			//right
+			this.dx = this.starting_speed;
+		}
+	}
+	this.reset = function(){
+		this.dx = 0;
+	    this.dy = 0;
+      	this.x = 500
+      	this.y = 250
+	}
 	this.collides = function(a_paddle){
 		
 		if(this.x + this.radius >= a_paddle.x 
 			&& this.x - this.radius <= a_paddle.x + a_paddle.width
 			&& this.y - this.radius <= a_paddle.y + a_paddle.length
 			&& this.y + this.radius >= a_paddle.y){
+
+				if(this.dx > 0){	
+					this.dx+=20;	
+				}else{
+					this.dx-=20;
+				}		
 				return true;
 		}
 	
