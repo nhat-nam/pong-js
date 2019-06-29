@@ -9,6 +9,8 @@ this.dy = 0;
 this.starting_speed = 500;
 this.max_speed_x = 1000;
 
+this.original_color = "white";
+this.color = "white";
 this.radius = 10;
 
 this.update = function(delta){
@@ -16,8 +18,11 @@ this.update = function(delta){
 	this.y = this.y + (this.dy * (delta/1000));
 	this.x = this.x + (this.dx * (delta/1000));
 }
+this.resetColor = function(){
+	this.color = this.original_color;
+}
 this.render = function(ctx){
-		ctx.fillStyle="white";
+		ctx.fillStyle=this.color;
 		ctx.beginPath();
 		ctx.arc(this.x, this.y, this.radius, 0, 360);
 		ctx.fill();

@@ -8,14 +8,14 @@ ctx.fillRect(0, 0, 1000, 500);
 WIDTH = 1000;
 HEIGHT = 500;
 
-MAX_BALL_SPEED_Y = 300;
+MAX_BALL_SPEED_Y = 500;
 
 MAX_PADDLE_SPEED = 500;
 
 PLAYER_1_POINTS = 0;
 
 PLAYER_2_POINTS = 0;
-
+//comments
 
 
 function Game(context, width, height) {
@@ -28,7 +28,7 @@ function Game(context, width, height) {
    this.paddle1 = new Paddle(20);
    this.paddle2 = new Paddle(this.width - 20 - 30);
 
-
+//comments
    this.menu = new Menu(width, height);
    this.menu.init();
    this.pauseMenu = new PauseMenu(width, height);
@@ -43,8 +43,11 @@ function Game(context, width, height) {
    this.game_state = "menu";
    this.player_count = 1;
 
+   /**
+   *    
+   **/
    this.loop = function(){
-		this.update(this._delta);
+		this.update(this._delta);   
 		this.render();
 		var g = this;
 		setTimeout(
@@ -67,13 +70,30 @@ function Game(context, width, height) {
    
    		this.ball.update(delta);
    		this.paddle1.update(delta);
+   		 
+         //this.paddle2.dy=100;
+
+         if(this.player_count == 1 && this.game_state == "playing"){
 
 
-         /* update based on computer AI */
+            if(this.ball.y < this.paddle2.y + (this.paddle2.length / 2)  -30 ){
+               this.paddle2.dy = -1 * MAX_PADDLE_SPEED;
+            }else if (this.ball.y > this.paddle2.y + (this.paddle2.length / 2) +30 ){
+               this.paddle2.dy = MAX_PADDLE_SPEED;
+            }else{
+               this.stopPaddle2();
+            }
+            this.paddle2.update(delta);
+
+            if(this.paddle2.y <= 0 || this.paddle2.y + this.paddle2.length >= this.height){
+               this.stopPaddle2();
+            }
+         }else{
+            this.paddle2.update(delta);
+         }
 
 
-
-   		this.paddle2.update(delta);
+         
 
 
 
@@ -106,13 +126,14 @@ function Game(context, width, height) {
    		if(this.ball.x + this.ball.radius >= this.width){
    			this.newRound();
             PLAYER_1_POINTS = PLAYER_1_POINTS + 1;
+         
    		}
 
 
    		// check if ball hits left side
    		if(this.ball.x - this.ball.radius <= 0){
    			this.newRound();
-            PLAYER_2_POINTS = PLAYER_2_POINTS + 1;
+            PLAYER_2_POINTS = PLAYER_2_POINTS + 1
    		}
 
 
@@ -138,6 +159,9 @@ function Game(context, width, height) {
             this.newGame();
 
          }
+      
+
+
       }
 
    }
@@ -162,8 +186,19 @@ function Game(context, width, height) {
                this.drawInstructions();      
             }
             this.drawScore();
+            
+            if(this.ball.color == "black"){
+               this.drawCheatWarning();
+            }
+
          }
 
+      }
+
+      this.drawCheatWarning = function(){
+         ctx.font = "20px Arial";
+         ctx.fillText("Invisi-ball", 470, 400);
+         ctx.fillStyle = "white";
       }
 
       this.drawScore = function(){
@@ -185,6 +220,9 @@ function Game(context, width, height) {
       this.game_state = "serve";
 
       this.drawInstructions();
+
+      this.paddle1.y = 210;
+      this.paddle2.y = 210;
    }
 
    this.newGame = function(){
@@ -195,6 +233,9 @@ function Game(context, width, height) {
 
       PLAYER_1_POINTS = 0;
       PLAYER_2_POINTS = 0;
+
+      this.paddle1.y = 210;
+      this.paddle2.y = 210;
    }
 
 
@@ -228,6 +269,7 @@ function Game(context, width, height) {
    }
 
    this.serve = function(){
+
       this.ball.serve(Math.floor(Math.random() * 2));
       this.game_state = "playing";
 
@@ -245,13 +287,31 @@ function Game(context, width, height) {
       this.player_count = this.menu.current_option + 1; 
       this.game_state = "serve";
       this.ball.reset();
+      this.paddle1.y = 210;
+      this.paddle2.y = 210;   
+
+      PLAYER_1_POINTS = 0;
+      PLAYER_2_POINTS = 0;
+
       //this.ball.dx = (Math.floor(Math.random() * 2) -1) * 500;
    }
+   this.cheat = function(){
+      if(this.ball.dx < 0 && this.ball.x - this.ball.radius >= 600){
+      this.ball.color = "black"
+      var b = this.ball; 
+      setTimeout(
+         function(){ 
+            b.resetColor();
+         },500);
 
+      //his.ball.dx = -1 * ((Math.random() * 201) + 500);
+      this.ball.dy = ((Math.random() * MAX_BALL_SPEED_Y*2) - MAX_BALL_SPEED_Y);
+
+      }
+
+   }
 
 }
-
-
 
 
 var game = new Game(ctx, 1000, 500);
@@ -278,9 +338,9 @@ window.onkeydown = function(e){
          game.menu.optionUp();
       }  else if (game.game_state == "game_over"){
          game.endMenu.optionUp();
-      }   
-
-
+      }  else if(game.game_state == "paused"){
+         game.pauseMenu.optionUp();
+      }
    }
    if(e.key == "ArrowDown"){
       // move paddle 2 down
@@ -290,37 +350,57 @@ window.onkeydown = function(e){
          game.menu.optionDown();
       }else if (game.game_state == "game_over"){
          game.endMenu.optionDown();
+      }else if (game.game_state == "paused"){
+         game.pauseMenu.optionDown();
       }
 
+
    }
 
-   if(e.key == "ArrowRight"){
-      game.stopPaddle1();
-   }
-
-   if(e.key == " "){
-      if(game.game_state == "menu"){
-         game.startGame();
-      }else if (game.game_state == "serve"){
+      if(e.key == " "){
 
          //pause game.
          //serve the ball
-         game.serve();
-      }else if(game.game_state == "playing"){
-         //pause
-         game.pause();
-      }else if(game.game_state == "paused"){
-         game.unpause();
-      }else if (game.game_state == "game_over"){
-         if(game.endMenu.current_option==1){
-            game.game_state = "menu";
-         }else{
-           game.startGame();
+         if(game.game_state == "serve"){
+            game.serve();
+     
          }
       }
-      
+      if(e.key == "Enter"){
+         if(game.game_state == "menu"){
 
-   }
+            game.startGame();
+         }else if (game.game_state == "game_over"){
+            if(game.endMenu.current_option==1){
+               game.game_state = "menu";
+            }else{
+               game.startGame();
+            }
+         } else if(game.game_state == "paused"){
+            if(game.pauseMenu.current_option == 1){
+               game.game_state = "menu";
+            }else{
+               game.unpause();
+            }
+         
+         }
+
+      }
+
+   
+
+      if(e.key == "Escape"){
+         if(game.game_state == "serve" || game.game_state == "playing"){
+            game.pause();
+         }
+      }
+
+      if(e.key == "ArrowRight"){
+         if(game.game_state == "playing"){
+            game.cheat();
+         }
+         
+      }
 }
 
 

@@ -1,12 +1,14 @@
  function Paddle(x){
 
-this.x = x
-this.y = 18
+this.x = x;
+this.y = 210;
 
+this.dx = 0;
 this.dy = 0;
 
 this.width= 30;
 this.length = 80;
+
 
 this.update = function(delta){
 

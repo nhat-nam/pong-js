@@ -31,6 +31,7 @@ function Menu(w, h){
 			//render title
 		ctx.font = "30px Arial";
 		ctx.fillStyle = "black";
+		
 		ctx.fillText(this.title, 400, 100);
 	}
 	this.renderOptions = function(ctx){
@@ -59,11 +60,20 @@ function Menu(w, h){
 }
 
 
+function DifficultyMenu(w, h){
+	Menu.call(this, w, h);
+	this.init = function(){
+		this.title = "Difficulty";
+		this.options = ["Easy", "Normal", "Hard"];
+	}
+}
+
+
 function PauseMenu(w, h){
 	Menu.call(this,w,h);
 	this.init = function(){
 		this.title = "Paused";
-		this.options=[];
+		this.options=["Resume", "Exit"];
 	}
 }
 
