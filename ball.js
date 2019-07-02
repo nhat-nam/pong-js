@@ -21,13 +21,13 @@ this.update = function(delta){
 this.resetColor = function(){
 	this.color = this.original_color;
 }
-this.render = function(ctx){
+	this.render = function(ctx){
 		ctx.fillStyle=this.color;
 		ctx.beginPath();
 		ctx.arc(this.x, this.y, this.radius, 0, 360);
 		ctx.fill();
 		ctx.closePath();
-
+		//this.drawBallPath(ctx);
 	}
 
 
@@ -68,5 +68,94 @@ this.render = function(ctx){
 		return false;
 		// return false if ball does not collide. 
 
+	}
+	this.drawBallPath = function(ctx){
+
+		var x = this.x;
+		var y = this.y;
+		var slope = this.dy/this.dx;
+		ctx.strokeStyle="white";
+		var y_vel = this.dy;
+		ctx.moveTo(this.x,this.y);
+		var prevX, prevY;
+		while(  x < WIDTH && x > 0){
+			prevX = x;
+			prevY = y;
+			if(y_vel==0){
+				if(this.dx > 0 ){
+					x = 10000;
+				}else{
+					x = -10000;
+				}
+			}
+			if(y_vel > 0){
+				// 
+				distToBottom = HEIGHT - y-this.radius; 
+				distToNewX = distToBottom/slope;
+				x = x + distToNewX;
+				y=HEIGHT -this.radius;
+				y_vel = y_vel * -1;
+			}else if(y_vel< 0){
+				distToTop = y - this.radius;
+				distToNewX = distToTop/slope;
+				x = x - distToNewX;
+				y = this.radius;
+				y_vel = y_vel * -1;
+			}
+			ctx.lineTo(x,y);
+			slope = slope*-1;
+		}
+		ctx.stroke();
+		var d = (x-WIDTH)*slope;
+		if(d >= 0){
+			return d;
+		}else {
+			return 500 + d;
+		}
+	
+	}
+	this.predictBallPath = function(){
+
+		var x = this.x;
+		var y = this.y;
+		var slope = this.dy/this.dx;
+		var y_vel = this.dy;
+		var prevX, prevY;
+		while(  x < WIDTH && x > 0){
+			prevX = x;
+			prevY = y;
+			if(y_vel==0){
+				if(this.dx > 0 ){
+					x = 10000;
+				}else{
+					x = -10000;
+				}
+			}
+			if(y_vel > 0){
+				// 
+				distToBottom = HEIGHT - y-this.radius; 
+				distToNewX = distToBottom/slope;
+				x = x + distToNewX;
+				y=HEIGHT -this.radius;
+				y_vel = y_vel * -1;
+			}else if(y_vel< 0){
+				distToTop = y - this.radius;
+				distToNewX = distToTop/slope;
+				x = x - distToNewX;
+				y = this.radius;
+				y_vel = y_vel * -1;
+			}
+			slope = slope*-1;
+		}
+		var d = (x-WIDTH)*slope;
+		if(d == -0){
+			return 250;
+		}
+		if(d >= 0){
+			return d;
+		}else {
+			return 500 + d;
+		}
+		
 	}
 }

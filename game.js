@@ -8,14 +8,14 @@ ctx.fillRect(0, 0, 1000, 500);
 WIDTH = 1000;
 HEIGHT = 500;
 
-MAX_BALL_SPEED_Y = 500;
+MAX_BALL_SPEED_Y = 600;
 
 MAX_PADDLE_SPEED = 500;
 
 PLAYER_1_POINTS = 0;
 
 PLAYER_2_POINTS = 0;
-//comments
+//commetns
 
 
 function Game(context, width, height) {
@@ -29,23 +29,28 @@ function Game(context, width, height) {
    this.paddle2 = new Paddle(this.width - 20 - 30);
 
 //comments
-   this.menu = new Menu(width, height);
+   this.menu = new PongMenu(width, height);
    this.menu.init();
    this.pauseMenu = new PauseMenu(width, height);
    this.pauseMenu.init();
    this.endMenu = new AvengersMenu(width, height);
    this.endMenu.init();
+   this.difMenu = new DifficultyMenu(width, height);
+   this.difMenu.init();
+
+   this.resetGame = function(){
+      this.player_1_points = 0;
+      this.player_2_points = 0;
+      this.menu.current_option = 0;
+      this.pauseMenu.current_option = 0;
+      this.endMenu.current_option = 0;
+      this.difMenu.current_option = 0;
+      this.game_state = "menu";
+      this.player_count = -1;
+      this.difficulty_option = 1;      
+   }
 
 
-   this.player_1_points = 0;
-   this.player_2_points = 0;
-
-   this.game_state = "menu";
-   this.player_count = 1;
-
-   /**
-   *    
-   **/
    this.loop = function(){
 		this.update(this._delta);   
 		this.render();
@@ -57,59 +62,87 @@ function Game(context, width, height) {
 
    }
 
-
-
    this.update = function(delta) {
 
       // new code for menu....
-
-
       if(this.game_state == "menu"){
-         // 
+         if(this.player_count == 1){
+            this.game_state = "difficulty_level"
+         }
+      }else if(this.game_state == "newly_scored"){
+         var g = this;
+         setTimeout(function(){
+            g.newRound();
+         }, 1500);   
+         this.game_state = "waiting_to_serve";
+      }else if(this.game_state == "difficulty_level"){
+        // choosing which difficulty level
+
       }else if(this.game_state == "playing" || this.game_state == "serve"){
    
    		this.ball.update(delta);
    		this.paddle1.update(delta);
    		 
-         //this.paddle2.dy=100;
+         if(this.player_count == 1){
+            // One Players
+            if(this.difficulty_option == 1){
+            
+               if(this.ball.y < this.paddle2.y + (this.paddle2.length / 2)  -45 ){
+                  this.paddle2.dy = -1 * MAX_PADDLE_SPEED/2;
+                  this.paddle2.update(delta);
+               }else if (this.ball.y > this.paddle2.y + (this.paddle2.length / 2) +45 ){
+                  this.paddle2.dy = MAX_PADDLE_SPEED/2;
+                  this.paddle2.update(delta);            
+               }else{
+                  this.stopPaddle2();
+               }
+            } else if(this.difficulty_option == 2){
+               if(this.ball.y < this.paddle2.y + (this.paddle2.length / 2)  -45 ){
+                  this.paddle2.dy = -1 * MAX_PADDLE_SPEED;
+                  this.paddle2.update(delta);
+               }else if (this.ball.y > this.paddle2.y + (this.paddle2.length / 2) +45 ){
+                  this.paddle2.dy = MAX_PADDLE_SPEED;
+                  this.paddle2.update(delta);            
+               }else{
+                  this.stopPaddle2();
+               }
+            }else if(this.difficulty_option == 3){
+               if(this.ball.y < this.paddle2.y + (this.paddle2.length / 2)  -45 ){
+                  this.paddle2.dy = -1 * MAX_PADDLE_SPEED*1.25;
+                  this.paddle2.update(delta);
+               }else if (this.ball.y > this.paddle2.y + (this.paddle2.length / 2) +45 ){
+                  this.paddle2.dy = MAX_PADDLE_SPEED*1.25;
+                  this.paddle2.update(delta);            
+               }else{
+                  this.stopPaddle2();
+               }
 
-         if(this.player_count == 1 && this.game_state == "playing"){
-
-
-            if(this.ball.y < this.paddle2.y + (this.paddle2.length / 2)  -30 ){
-               this.paddle2.dy = -1 * MAX_PADDLE_SPEED;
-            }else if (this.ball.y > this.paddle2.y + (this.paddle2.length / 2) +30 ){
-               this.paddle2.dy = MAX_PADDLE_SPEED;
-            }else{
-               this.stopPaddle2();
+            } else if(this.difficulty_option == 4){
+               var targetY = this.ball.predictBallPath(this);
+               if(targetY < this.paddle2.y + (this.paddle2.length / 2)  -25 ){
+                  this.paddle2.dy = -1 * MAX_PADDLE_SPEED;
+                  this.paddle2.update(delta);
+               }else if (targetY > this.paddle2.y + (this.paddle2.length / 2) + 25 ){
+                  this.paddle2.dy = MAX_PADDLE_SPEED;
+                  this.paddle2.update(delta);            
+               }else{
+                  this.stopPaddle2();
+               }               
             }
-            this.paddle2.update(delta);
 
-            if(this.paddle2.y <= 0 || this.paddle2.y + this.paddle2.length >= this.height){
-               this.stopPaddle2();
-            }
+            
          }else{
+            // Two players
             this.paddle2.update(delta);
          }
-
-
-         
-
-
-
          var centerOfPaddle, distanceFromCenter;
 
    		if(this.ball.collides(this.paddle1) ){
-
             this.ball.dx = Math.abs(this.ball.dx);
-
-
             centerOfPaddle = this.paddle1.y + (this.paddle1.length / 2);
             distanceFromCenter = this.ball.y - centerOfPaddle;
             var new_y_speed = distanceFromCenter / ( this.paddle1.length / 2 )  * MAX_BALL_SPEED_Y;
             this.ball.dy = new_y_speed;
-
-
          }
          if(this.ball.collides(this.paddle2) ){
             this.ball.dx = Math.abs(this.ball.dx)* -1;
@@ -117,25 +150,19 @@ function Game(context, width, height) {
             distanceFromCenter = this.ball.y - centerOfPaddle;
             var new_y_speed = distanceFromCenter / ( this.paddle2.length / 2 )  * MAX_BALL_SPEED_Y;
             this.ball.dy = new_y_speed;
-
-
          }
-
-
    		// Check if ball hits right side
-   		if(this.ball.x + this.ball.radius >= this.width){
-   			this.newRound();
+   		if(this.ball.x - this.ball.radius >= this.width){
+            this.game_state = "newly_scored";
             PLAYER_1_POINTS = PLAYER_1_POINTS + 1;
          
    		}
 
-
    		// check if ball hits left side
-   		if(this.ball.x - this.ball.radius <= 0){
-   			this.newRound();
+   		if(this.ball.x + this.ball.radius <= 0){
+            this.game_state = "newly_scored";
             PLAYER_2_POINTS = PLAYER_2_POINTS + 1
    		}
-
 
    		//check if ball hits bottom
    		if(this.ball.y + this.ball.radius >= this.height){
@@ -150,22 +177,15 @@ function Game(context, width, height) {
          if(PLAYER_2_POINTS == 5 || PLAYER_1_POINTS == 5){
             this.game_state = "game_over";
             if(PLAYER_2_POINTS > PLAYER_1_POINTS){
-
                this.endMenu.winner = 2;
             }else{
                this.endMenu.winner = 1;
             }
-
             this.newGame();
-
          }
-      
-
-
       }
-
+      
    }
-
    this.render = function() {
    		this.ctx.clearRect(0, 0, this.width, this.height);
    		this.ctx.fillStyle = "black";
@@ -177,23 +197,35 @@ function Game(context, width, height) {
             this.pauseMenu.render(this.ctx);
          }else if(this.game_state == "game_over"){
             this.endMenu.render(this.ctx);
-         }else{
-
-            this.ball.render(this.ctx);
-            this.paddle1.render(this.ctx);
-            this.paddle2.render(this.ctx);
-            if(this.game_state =="serve"){
-               this.drawInstructions();      
-            }
-            this.drawScore();
-            
-            if(this.ball.color == "black"){
-               this.drawCheatWarning();
-            }
-
+         }else if(this.game_state == "difficulty_level"){
+            this.difMenu.render(this.ctx);
+         }
+         if(this.game_state == "waiting_to_serve"){
+               // draw .... 
+               if(this.ball.x > WIDTH){
+               ctx.font = "20px Arial";
+               ctx.fillStyle = "white";
+               ctx.fillText("Player 1 Scores!", 470, 400);
+         }else if(this.ball.x < 0){ 
+            ctx.font = "20px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("Player 2 Scores!", 470, 400);}
          }
 
-      }
+         this.ball.render(this.ctx);
+         this.paddle1.render(this.ctx);
+         this.paddle2.render(this.ctx);
+         if(this.game_state =="serve"){
+               this.drawInstructions();      
+         }
+         this.drawScore();
+            
+         if(this.ball.color == "black"){
+               this.drawCheatWarning();
+         }
+
+   }
+
 
       this.drawCheatWarning = function(){
          ctx.font = "20px Arial";
@@ -213,7 +245,17 @@ function Game(context, width, height) {
          ctx.fillStyle = "white";
       }
 
+      this.drawPlayer1 = function(){
+         ctx.font = "25px Arial";
+         ctx.fillText("Player 1 Scores!", 420, 70);
+         ctxfillStyle = "white";
+      }
 
+      this.drawPlayer2 = function(){
+         ctx.font = "25px Arial";
+         ctx.fillText("Player 2 Scores!", 420, 70);
+         ctxfillStyle = "white";
+      }
 
    this.newRound = function(){
       this.ball.reset();
@@ -223,6 +265,9 @@ function Game(context, width, height) {
 
       this.paddle1.y = 210;
       this.paddle2.y = 210;
+   
+      this.paddle1.dy = 0;
+      this.paddle2.dy = 0;
    }
 
    this.newGame = function(){
@@ -236,6 +281,9 @@ function Game(context, width, height) {
 
       this.paddle1.y = 210;
       this.paddle2.y = 210;
+   
+      this.paddle1.dy = 0;
+      this.paddle2.dy = 0;
    }
 
 
@@ -280,11 +328,27 @@ function Game(context, width, height) {
    this.unpause = function(){
       this.game_state = "playing";
    }   
+   this.beforeStartGame = function(){
+      if(this.game_state == "menu"){
+         this.player_count = this.menu.current_option + 1;
+      }
+      if(this.player_count == 1){
+         this.game_state = "difficulty_level";
+      }else{
+         this.startGame();
+      }
+   }
    this.startGame = function(){
 
       // howmany players? 
       // this.menu.option (0 -> 1 player, 1 -> 2 players)
-      this.player_count = this.menu.current_option + 1; 
+      if(this.game_state == "menu"){
+         this.player_count = this.menu.current_option + 1;
+      }
+
+      if(this.game_state == "difficulty_level"){   
+         this.difficulty_option = this.difMenu.current_option + 1;
+      }
       this.game_state = "serve";
       this.ball.reset();
       this.paddle1.y = 210;
@@ -296,22 +360,27 @@ function Game(context, width, height) {
       //this.ball.dx = (Math.floor(Math.random() * 2) -1) * 500;
    }
    this.cheat = function(){
-      if(this.ball.dx < 0 && this.ball.x - this.ball.radius >= 600){
-      this.ball.color = "black"
-      var b = this.ball; 
-      setTimeout(
-         function(){ 
-            b.resetColor();
-         },500);
+      if(this.player_count == 2 && this.ball.dx < 0 && this.ball.x  >= 300){
+         alert("you're about to get crushed");
+         this.ball.color = "black"
+         var b = this.ball; 
+         setTimeout(
+            function(){ 
+               b.resetColor();
+            },500);
 
-      //his.ball.dx = -1 * ((Math.random() * 201) + 500);
-      this.ball.dy = ((Math.random() * MAX_BALL_SPEED_Y*2) - MAX_BALL_SPEED_Y);
+         //his.ball.dx = -1 * ((Math.random() * 201) + 500);
+         this.ball.dy = ((Math.random() * MAX_BALL_SPEED_Y*2) - MAX_BALL_SPEED_Y);
+        // if(this.ball.dx > MAX_BALL_SPEED_Y -)
 
       }
 
    }
 
+   this.resetGame();
+
 }
+
 
 
 var game = new Game(ctx, 1000, 500);
@@ -319,7 +388,7 @@ var game = new Game(ctx, 1000, 500);
 window.onkeydown = function(e){
 
 
-   console.log(e);
+   //console.log(e);
    // Paddle #1
    if(e.key == "w"){ 
       game.movePaddle1Up();
@@ -340,7 +409,10 @@ window.onkeydown = function(e){
          game.endMenu.optionUp();
       }  else if(game.game_state == "paused"){
          game.pauseMenu.optionUp();
+      }else if (game.game_state == "difficulty_level"){
+         game.difMenu.optionUp();
       }
+
    }
    if(e.key == "ArrowDown"){
       // move paddle 2 down
@@ -352,13 +424,14 @@ window.onkeydown = function(e){
          game.endMenu.optionDown();
       }else if (game.game_state == "paused"){
          game.pauseMenu.optionDown();
+      }else if (game.game_state == "difficulty_level"){
+         game.difMenu.optionDown();
       }
 
 
    }
 
       if(e.key == " "){
-
          //pause game.
          //serve the ball
          if(game.game_state == "serve"){
@@ -368,17 +441,20 @@ window.onkeydown = function(e){
       }
       if(e.key == "Enter"){
          if(game.game_state == "menu"){
-
+            // call beforeStartGame();
+            game.beforeStartGame();
+         }else if (game.game_state == "difficulty_level"){
             game.startGame();
          }else if (game.game_state == "game_over"){
             if(game.endMenu.current_option==1){
-               game.game_state = "menu";
+               game.resetGame();
             }else{
                game.startGame();
             }
          } else if(game.game_state == "paused"){
             if(game.pauseMenu.current_option == 1){
-               game.game_state = "menu";
+               //game.beforeStartGame();
+               game.resetGame();
             }else{
                game.unpause();
             }
