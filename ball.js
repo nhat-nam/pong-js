@@ -1,26 +1,26 @@
 function Ball(){
 
-this.x = 500
-this.y = 250
+	this.x = 500
+	this.y = 250
 
-this.dx = 0;
-this.dy = 0;
+	this.dx = 0;
+	this.dy = 0;
 
-this.starting_speed = 500;
-this.max_speed_x = 1000;
+	this.starting_speed = 500;
+	this.max_speed_x = 2000;
 
-this.original_color = "white";
-this.color = "white";
-this.radius = 10;
+	this.original_color = "white";
+	this.color = "white";
+	this.radius = 10;
 
-this.update = function(delta){
+	this.update = function(delta){
 
-	this.y = this.y + (this.dy * (delta/1000));
-	this.x = this.x + (this.dx * (delta/1000));
-}
-this.resetColor = function(){
-	this.color = this.original_color;
-}
+		this.y = this.y + (this.dy * (delta/1000));
+		this.x = this.x + (this.dx * (delta/1000));
+	}
+	this.resetColor = function(){
+		this.color = this.original_color;
+	}
 	this.render = function(ctx){
 		ctx.fillStyle=this.color;
 		ctx.beginPath();
@@ -57,8 +57,14 @@ this.resetColor = function(){
 
 				if(this.dx > 0){	
 					this.dx+=20;	
+					if(this.dx > this.max_speed_x){
+						this.dx = this.max_speed_x;
+					}
 				}else{
 					this.dx-=20;
+					if(this.dx < -1*this.max_speed_x){
+						this.dx = -1*this.max_speed_x;
+					}
 				}		
 				return true;
 		}
