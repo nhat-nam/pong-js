@@ -25,7 +25,7 @@ function Menu(w, h){
 			//render title
 		ctx.font = "30px Arial";
 		ctx.fillStyle = "black";
-		ctx.fillText(this.title, 400, 100);
+		ctx.fillText(this.title, 440, 100);
 	}
 
 	this.renderSelector = function(ctx,x, y){
@@ -42,9 +42,9 @@ function Menu(w, h){
 		for(var i = 0; i < this.options.length;i++){
 			// display current choice
 			if(this.current_option == i){
-				this.renderSelector(ctx, 390, 145+20*i);
+				this.renderSelector(ctx, 430, 145+20*i);
 			}
-			ctx.fillText(this.options[i], 400, 150 + 20 * i );
+			ctx.fillText(this.options[i], 440, 150 + 20 * i );
 		}
 	}
 	this.render = function(ctx){
