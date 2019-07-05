@@ -245,18 +245,6 @@ function Game(context, width, height) {
          ctx.fillStyle = "white";
       }
 
-      this.drawPlayer1 = function(){
-         ctx.font = "25px Arial";
-         ctx.fillText("Player 1 Scores!", 420, 70);
-         ctxfillStyle = "white";
-      }
-
-      this.drawPlayer2 = function(){
-         ctx.font = "25px Arial";
-         ctx.fillText("Player 2 Scores!", 420, 70);
-         ctxfillStyle = "white";
-      }
-
    this.newRound = function(){
       this.ball.reset();
       this.game_state = "serve";
@@ -361,15 +349,14 @@ function Game(context, width, height) {
    }
    this.cheat = function(){
       if(this.player_count == 2 && this.ball.dx < 0 && this.ball.x  >= 300){
-         alert("you're about to get crushed");
-         this.ball.color = "black"
          var b = this.ball; 
+         b.color = "black";
          setTimeout(
             function(){ 
                b.resetColor();
             },500);
 
-         //his.ball.dx = -1 * ((Math.random() * 201) + 500);
+         this.ball.dx = -1 * ((Math.random() * 201) + 500);
          this.ball.dy = ((Math.random() * MAX_BALL_SPEED_Y*2) - MAX_BALL_SPEED_Y);
         // if(this.ball.dx > MAX_BALL_SPEED_Y -)
 
@@ -479,20 +466,14 @@ window.onkeydown = function(e){
       }
 }
 
-
 window.onkeyup = function(e){
-
-
    // if key is up or down, game.stopPaddle2();
    if(e.key == "w" || e.key == "s"){
       game.stopPaddle1();
    }
-
    if(e.key == "ArrowUp" || e.key == "ArrowDown"){
       game.stopPaddle2();
    }
-
-
 }
 
 game.loop();
